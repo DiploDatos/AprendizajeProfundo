@@ -103,4 +103,8 @@ venv.bak/
 # mypy
 .mypy_cache/
 
+dataset
+
 *.slides.html
+martin_fierro.txt
+mlruns
