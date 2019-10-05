@@ -1,4 +1,13 @@
-"""Exercise 1"""
+"""Exercise 1
+
+Usage:
+
+$ CUDA_VISIBLE_DEVICES=2 python practico_1_train_petfinder.py --dataset_dir ../ --epochs 30 --dropout 0.1 0.1 --hidden_layer_sizes 200 100
+
+To know which GPU to use, you can check it with the command
+
+$ nvidia-smi
+"""
 
 import argparse
 
