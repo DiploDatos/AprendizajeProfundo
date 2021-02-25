@@ -2,19 +2,19 @@
 
 En este práctico trabajaremos en el problema de clasificación de texto del MeLi Challenge 2019.
 
-IMG
+![meli spanish](images/img1_practico.png)
 
 El datasets tiene información acerca de títulos de publicaciones, categoría de los mismos, información de idioma y confiabilidad de la anotación.
 Cuenta con anotaciones de títulos para 632 categorías distintas.
 
-IMG2
+![categories](images/img2_practico.png)
 
 El dataset también cuenta con una partición de test que está compuesta de 63680 de ejemplos con las mismas categorías
 (aunque no necesariamente la misma distribución).
 
 También hay datos en idioma portugues, aunque para el práctico de esta materia basta con usar uno solo de los idiomas.
 
-IMG3
+![meli portuguese](images/img3_practico.png)
 
 ## Ejercicio:
 Implementar una red neuronal que asigne una categoría dado un título.
@@ -22,7 +22,7 @@ Para este práctico se puede usar cualquier tipo de red neuronal. Les que hagan 
 implementarán un MLP. Quienes cursan la materia completa, deberían implementar algo más complejo, usando CNNs,
 RNNs o Transformers.
 
-IMG4
+![NN architecture](images/img4_practico.png)
 
 Algunas consideraciones a tener en cuenta para estructurar el trabajo:
 
