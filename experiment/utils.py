@@ -1,5 +1,6 @@
 import csv
 import gzip
+import logging
 import torch
 
 from gensim import corpora
@@ -42,6 +43,7 @@ class RawDataProcessor:
             ]
 
         # Create dictionary based on all the reviews (with corresponding preprocessing)
+        logging.getLogger().setLevel(logging.ERROR)
         self.dictionary = corpora.Dictionary()
         labels = set()
 
@@ -65,6 +67,7 @@ class RawDataProcessor:
         })
         self.idx_to_target = sorted(labels)
         self.target_to_idx = {t: i for i, t in enumerate(self.idx_to_target, start=1)}
+        logging.getLogger().setLevel(logging.INFO)
 
     def _preprocess_string(self, string):
         return preprocessing.preprocess_string(string, filters=self.filters)
