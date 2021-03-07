@@ -7,7 +7,7 @@ import torch.optim as optim
 import torch.nn as nn
 import torch.nn.functional as F
 
-from skilearn.metrics import balanced_accuracy_score
+from sklearn.metrics import balanced_accuracy_score
 from torch.utils.data import DataLoader
 from tqdm import tqdm, trange
 
