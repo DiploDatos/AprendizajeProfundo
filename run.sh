@@ -24,6 +24,7 @@ export CUDA_VISIBLE_DEVICES=0
 
 python -m experiment.mlp \
     --train-data ./data/meli-challenge-2019/spanish.train.jsonl.gz \
+    --token-to-index ./data/meli-challenge-2019/spanish_token_to_index.json.gz \
     --pretrained-embeddings ./data/SBW-vectors-300-min5.txt.gz \
     --language spanish
     --validation-data ./data/meli-challenge-2019/spanish.validation.jsonl.gz \
