@@ -1,4 +1,5 @@
 import argparse
+import gzip
 import logging
 import mlflow
 import torch
@@ -32,7 +33,7 @@ class MLPClassifier(nn.Module):
         super().__init__()
         embeddings_matrix = torch.randn(len(dictionary), vector_size)
         embeddings_matrix[0] = torch.zeros(vector_size)
-        with open(pretrained_embeddings_path, "rt") as fh:
+        with gzip.open(pretrained_embeddings_path, "rt") as fh:
             next(fh)
             for line in fh:
                 word, vector = line.strip().split(None, 1)
