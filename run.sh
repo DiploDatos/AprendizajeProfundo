@@ -23,10 +23,10 @@ export PATH=$CUDA_HOME/bin:$PATH
 export CUDA_VISIBLE_DEVICES=0
 
 python -m experiment.mlp \
-    --train-data ./data/meli-challenge-2019/spanish.train.csv.gz \
-    --pretrained-embeddings ./data/SBW-vectors-300-min5.txt \
+    --train-data ./data/meli-challenge-2019/spanish.train.jsonl.gz \
+    --pretrained-embeddings ./data/SBW-vectors-300-min5.txt.gz \
     --language spanish
-    --validation-data ./data/meli-challenge-2019/spanish.validation.csv.gz \
+    --validation-data ./data/meli-challenge-2019/spanish.validation.jsonl.gz \
     --embeddings-size 300 \
     --hidden-layers 256 128 \
     --dropout 0.3

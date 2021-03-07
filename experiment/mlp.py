@@ -12,7 +12,7 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm, trange
 
 from .dataset import MeliChallengeDataset
-from .utils import DATASET_SIZES, RawDataProcessor, PadSequences
+from .utils import PadSequences
 
 
 logging.basicConfig(
@@ -97,15 +97,6 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    logging.info("Building processor")
-    preprocess = RawDataProcessor(
-        dataset_path=args.train_data,
-        dataset_size=DATASET_SIZES[args.language]["train"],
-        ignore_header=True,
-        filters=None,  # Default filters
-        vocab_size=50000  # This can be a hyperparameter
-    )
-
     pad_sequences = PadSequences(
         pad_value=0,
         max_length=None,
@@ -115,7 +106,6 @@ if __name__ == "__main__":
     logging.info("Building training dataset")
     train_dataset = MeliChallengeDataset(
         dataset_path=args.train_data,
-        dataset_size=DATASET_SIZES[args.language]["train"],
         random_buffer_size=2048,  # This can be a hypterparameter
         transform=preprocess
     )
@@ -131,7 +121,6 @@ if __name__ == "__main__":
         logging.info("Building validation dataset")
         validation_dataset = MeliChallengeDataset(
             dataset_path=args.validation_data,
-            dataset_size=DATASET_SIZES[args.language]["validation"],
             random_buffer_size=1,
             transform=preprocess
         )
@@ -150,7 +139,6 @@ if __name__ == "__main__":
         logging.info("Building test dataset")
         test_dataset = MeliChallengeDataset(
             dataset_path=args.test_data,
-            dataset_size=DATASET_SIZES[args.language]["test"],
             random_buffer_size=1,
             transform=preprocess
         )

@@ -1,5 +1,5 @@
-import csv
 import gzip
+import json
 import random
 
 from torch.utils.data import IterableDataset
@@ -8,14 +8,15 @@ from torch.utils.data import IterableDataset
 class MeliChallengeDataset(IterableDataset):
     def __init__(self,
                  dataset_path,
-                 dataset_size,
-                 random_buffer_size=2048,
-                 transform=None):
+                 random_buffer_size=2048):
         assert random_buffer_size > 0
         self.dataset_path = dataset_path
-        self.dataset_size = dataset_size
         self.random_buffer_size = random_buffer_size
-        self.transform = transform
+
+        with gzip.open(self.dataset_path, "rt") as dataset:
+            item = next(dataset)
+            self.n_labels = item["n_labels"] + 1
+            self.dataset_size = item["dataset_size"]
 
     def __len__(self):
         return self.dataset_size
@@ -24,39 +25,28 @@ class MeliChallengeDataset(IterableDataset):
         try:
             with gzip.open(self.dataset_path, "rt") as dataset:
                 shuffle_buffer = []
-                csv_reader = csv.reader(dataset)
-                next(csv_reader)
 
-                for line in csv_reader:
-                    _, label_quality, title, category = line
+                for line in dataset:
+                    item = json.loads(line.strip())
+                    item = {
+                        "data": item["data"],
+                        "target": item["target"]
+                    }
 
                     if self.random_buffer_size == 1:
-                        item = {
-                            "title": f"{label_quality} {title}",
-                            "category": category
-                        }
-                        if self.transform:
-                            item = self.transform(item)
                         yield item
                     else:
-                        shuffle_buffer.append({
-                            "title": f"{label_quality} {title}",
-                            "category": category
-                        })
+                        shuffle_buffer.append(item)
 
                         if len(shuffle_buffer) == self.random_buffer_size:
                             random.shuffle(shuffle_buffer)
                             for item in shuffle_buffer:
-                                if self.transform:
-                                    item = self.transform(item)
                                 yield item
                             shuffle_buffer = []
 
-            if len(shuffle_buffer) > 0:
-                random.shuffle(shuffle_buffer)
-                for item in shuffle_buffer:
-                    if self.transform:
-                        item = self.transform(item)
-                    yield item
+                if len(shuffle_buffer) > 0:
+                    random.shuffle(shuffle_buffer)
+                    for item in shuffle_buffer:
+                        yield item
         except GeneratorExit:
             return
