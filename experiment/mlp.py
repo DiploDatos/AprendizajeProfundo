@@ -1,5 +1,6 @@
 import argparse
 import gzip
+import json
 import logging
 import mlflow
 import torch
@@ -24,21 +25,23 @@ logging.basicConfig(
 class MLPClassifier(nn.Module):
     def __init__(self,
                  pretrained_embeddings_path,
-                 dictionary,
+                 token_to_index,
                  n_labels,
                  hidden_layers=[256, 128],
                  dropout=0.3,
                  vector_size=300,
                  freeze_embedings=True):
         super().__init__()
-        embeddings_matrix = torch.randn(len(dictionary), vector_size)
+        with gzip.open(token_to_index, "rt") as fh:
+            token_to_index = json.load(token_to_index)
+        embeddings_matrix = torch.randn(len(token_to_index), vector_size)
         embeddings_matrix[0] = torch.zeros(vector_size)
         with gzip.open(pretrained_embeddings_path, "rt") as fh:
             next(fh)
             for line in fh:
                 word, vector = line.strip().split(None, 1)
-                if word in dictionary.token2id:
-                    embeddings_matrix[dictionary.token2id[word]] =\
+                if word in token_to_index:
+                    embeddings_matrix[token_to_index[word]] =\
                         torch.FloatTensor([float(n) for n in vector.split()])
         self.embeddings = nn.Embedding.from_pretrained(embeddings_matrix,
                                                        freeze=freeze_embedings,
@@ -70,6 +73,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--train-data",
                         help="Path to the the training dataset",
+                        required=True)
+    parser.add_argument("--token-to-index",
+                        help="Path to the the json file that maps tokens to indices",
                         required=True)
     parser.add_argument("--pretrained-embeddings",
                         help="Path to the pretrained embeddings file.",
@@ -106,8 +112,7 @@ if __name__ == "__main__":
     logging.info("Building training dataset")
     train_dataset = MeliChallengeDataset(
         dataset_path=args.train_data,
-        random_buffer_size=2048,  # This can be a hypterparameter
-        transform=preprocess
+        random_buffer_size=2048  # This can be a hypterparameter
     )
     train_loader = DataLoader(
         train_dataset,
@@ -121,8 +126,7 @@ if __name__ == "__main__":
         logging.info("Building validation dataset")
         validation_dataset = MeliChallengeDataset(
             dataset_path=args.validation_data,
-            random_buffer_size=1,
-            transform=preprocess
+            random_buffer_size=1
         )
         train_loader = DataLoader(
             train_dataset,
@@ -139,8 +143,7 @@ if __name__ == "__main__":
         logging.info("Building test dataset")
         test_dataset = MeliChallengeDataset(
             dataset_path=args.test_data,
-            random_buffer_size=1,
-            transform=preprocess
+            random_buffer_size=1
         )
         train_loader = DataLoader(
             train_dataset,
@@ -170,8 +173,8 @@ if __name__ == "__main__":
         logging.info("Building classifier")
         model = MLPClassifier(
             pretrained_embeddings_path=args.pretrained_embeddings,
-            dictionary=preprocess.dictionary,
-            n_labels=len(preprocess.target_to_idx),
+            token_to_index=args.token_to_index,
+            n_labels=train_dataset.n_labels,
             hidden_layers=args.hidden_layers,
             dropout=args.dropout,
             vector_size=args.embeddings_size,
