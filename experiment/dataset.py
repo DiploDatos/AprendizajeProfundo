@@ -14,9 +14,9 @@ class MeliChallengeDataset(IterableDataset):
         self.random_buffer_size = random_buffer_size
 
         with gzip.open(self.dataset_path, "rt") as dataset:
-            item = next(dataset)
-            self.n_labels = item["n_labels"] + 1
-            self.dataset_size = item["dataset_size"]
+            item = json.loads(next(dataset).strip())
+            self.n_labels = item["n_labels"]
+            self.dataset_size = item["size"]
 
     def __len__(self):
         return self.dataset_size

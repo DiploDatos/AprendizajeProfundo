@@ -33,7 +33,7 @@ class MLPClassifier(nn.Module):
                  freeze_embedings=True):
         super().__init__()
         with gzip.open(token_to_index, "rt") as fh:
-            token_to_index = json.load(token_to_index)
+            token_to_index = json.load(fh)
         embeddings_matrix = torch.randn(len(token_to_index), vector_size)
         embeddings_matrix[0] = torch.zeros(vector_size)
         with gzip.open(pretrained_embeddings_path, "rt") as fh:
@@ -96,10 +96,14 @@ if __name__ == "__main__":
                         nargs="+",
                         default=[256, 128],
                         type=int)
-    parser.add_argument("--droptout",
+    parser.add_argument("--dropout",
                         help="Dropout to apply to each hidden layer",
                         default=0.3,
                         type=float)
+    parser.add_argument("--epochs",
+                        help="Number of epochs",
+                        default=3,
+                        type=int)
 
     args = parser.parse_args()
 
@@ -128,8 +132,8 @@ if __name__ == "__main__":
             dataset_path=args.validation_data,
             random_buffer_size=1
         )
-        train_loader = DataLoader(
-            train_dataset,
+        validation_loader = DataLoader(
+            validation_dataset,
             batch_size=128,
             shuffle=False,
             collate_fn=pad_sequences,
@@ -145,8 +149,8 @@ if __name__ == "__main__":
             dataset_path=args.test_data,
             random_buffer_size=1
         )
-        train_loader = DataLoader(
-            train_dataset,
+        test_loader = DataLoader(
+            test_dataset,
             batch_size=128,
             shuffle=False,
             collate_fn=pad_sequences,
@@ -166,7 +170,8 @@ if __name__ == "__main__":
             "embeddings": args.pretrained_embeddings,
             "hidden_layers": args.hidden_layers,
             "dropout": args.dropout,
-            "embeddings_size": args.embeddings_size
+            "embeddings_size": args.embeddings_size,
+            "epochs": args.epochs
         })
         device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
@@ -189,8 +194,7 @@ if __name__ == "__main__":
         )
 
         logging.info("Training classifier")
-        epochs = trange(3)  # This can be a hyperparameter
-        for epoch in epochs:
+        for epoch in trange(args.epochs):
             model.train()
             running_loss = []
             for idx, batch in enumerate(tqdm(train_loader)):
@@ -210,17 +214,18 @@ if __name__ == "__main__":
                 running_loss = []
                 targets = []
                 predictions = []
-                for batch in tqdm(validation_loader):
-                    data = batch["data"].to(device)
-                    target = batch["target"].to(device)
-                    output = model(data)
-                    running_loss.append(
-                        loss(output, target).item()
-                    )
-                    targets.extend(batch["target"].numpy())
-                    predictions.extend(output.squeeze().cpu().detach().numpy())
-                mlflow.log_metric("validation_loss", sum(running_loss) / len(running_loss), epoch)
-                mlflow.log_metric("validation_bacc", balanced_accuracy_score(targets, predictions), epoch)
+                with torch.no_grad():
+                    for batch in tqdm(validation_loader):
+                        data = batch["data"].to(device)
+                        target = batch["target"].to(device)
+                        output = model(data)
+                        running_loss.append(
+                            loss(output, target).item()
+                        )
+                        targets.extend(batch["target"].numpy())
+                        predictions.extend(output.argmax(axis=1).detach().cpu().numpy())
+                    mlflow.log_metric("validation_loss", sum(running_loss) / len(running_loss), epoch)
+                    mlflow.log_metric("validation_bacc", balanced_accuracy_score(targets, predictions), epoch)
 
         if test_dataset:
             logging.info("Evaluating model on test")
@@ -228,14 +233,15 @@ if __name__ == "__main__":
             running_loss = []
             targets = []
             predictions = []
-            for batch in tqdm(test_loader):
-                data = batch["data"].to(device)
-                target = batch["target"].to(device)
-                output = model(data)
-                running_loss.append(
-                    loss(output, target).item()
-                )
-                targets.extend(batch["target"].numpy())
-                predictions.extend(output.squeeze().cpu().detach().numpy())
-            mlflow.log_metric("test_loss", sum(running_loss) / len(running_loss), epoch)
-            mlflow.log_metric("test_bacc", balanced_accuracy_score(targets, predictions), epoch)
+            with torch.no_grad():
+                for batch in tqdm(test_loader):
+                    data = batch["data"].to(device)
+                    target = batch["target"].to(device)
+                    output = model(data)
+                    running_loss.append(
+                        loss(output, target).item()
+                    )
+                    targets.extend(batch["target"].numpy())
+                    predictions.extend(output.argmax(axis=1).detach().cpu().numpy())
+                mlflow.log_metric("test_loss", sum(running_loss) / len(running_loss), epoch)
+                mlflow.log_metric("test_bacc", balanced_accuracy_score(targets, predictions), epoch)

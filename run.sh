@@ -26,7 +26,7 @@ python -m experiment.mlp \
     --train-data ./data/meli-challenge-2019/spanish.train.jsonl.gz \
     --token-to-index ./data/meli-challenge-2019/spanish_token_to_index.json.gz \
     --pretrained-embeddings ./data/SBW-vectors-300-min5.txt.gz \
-    --language spanish
+    --language spanish \
     --validation-data ./data/meli-challenge-2019/spanish.validation.jsonl.gz \
     --embeddings-size 300 \
     --hidden-layers 256 128 \
