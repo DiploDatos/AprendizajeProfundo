@@ -46,7 +46,7 @@ Algunas consideraciones a tener en cuenta para estructurar el trabajo:
   3. Crear una clase para el modelo que se pueda instanciar con diferentes hiperparámetros
   4. Hacer logs de entrenamiento (reportar tiempo transcurrido, iteraciones/s, loss, accuracy, etc.). Usar MLFlow.
   5. Hacer un gráfico de la función de loss a lo largo de las epochs. MLFlow también puede generar la gráfica.
-  6. Reportar performance en el conjunto de test con el mejor modelo entrenado. La métrica para reportar será balanced accuracy ([balanced accuracy](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.balanced_accuracy_score.html)).
+  6. Reportar performance en el conjunto de test con el mejor modelo entrenado. La métrica para reportar será [balanced accuracy](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.balanced_accuracy_score.html).
 
 ## Ejercicios opcionales:
   1. Se puede tomar una subconjunto del train para armar un set de validation para probar configuraciones, arquitecturas o hiperparámetros (cuidado con la distribución de este conjunto). **No usar el conjunto de test para ajustar hiperparámetros.**
