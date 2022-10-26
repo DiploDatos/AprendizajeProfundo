@@ -1,0 +1,12 @@
+gensim
+mlflow
+tqdm
+jupyter
+matplotlib
+seaborn
+pandas
+numpy
+scikit-learn
+tensorflow
+optuna
+plotly
