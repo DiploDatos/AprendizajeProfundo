@@ -117,3 +117,5 @@ mlruns
 data/
 .vscode/
 .*.sw*
+*/data
+*/mlruns
