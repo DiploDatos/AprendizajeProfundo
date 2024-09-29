@@ -117,3 +117,6 @@ mlruns
 data/
 .vscode/
 .*.sw*
+
+# misc
+.DS_Store
